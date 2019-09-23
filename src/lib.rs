@@ -1,4 +1,7 @@
 
+
+pub mod hypervisor;
+
 pub struct NeutronAddress{
     pub version: u32,
     pub data: Vec<u8>
@@ -45,7 +48,25 @@ pub struct BlockContext{
     pub previous_hashes: Vec<[u8; 32]>
 }
 
-trait NeutronAPI{
+pub enum NeutronError{
+    Success,
+    RecoverableFailure,
+    UnrecoverableFailure
+}
 
+
+/// This is the primary NeutronAPI interface. It is loosely based on the C Neutron API, but uses Rust paradigms and features
+/// This will require a heavier translation layer, but makes Rust usage significantly simpler
+trait NeutronAPI{
+    fn get_context(&self) -> &NeutronContext;
+    fn push_sccs(&mut self, data: &Vec<u8>) -> Result<(), NeutronError>;
+    fn pop_sccs(&mut self, data: &mut Vec<u8>) -> Result<(), NeutronError>;
+    fn pop_sccs_toss(&mut self) -> NeutronError; //returns no data, for throwing away the item
+    fn peek_sccs(&mut self, data: &mut Vec<u8>) -> Result<(), NeutronError>;
+    fn peek_sccs_size(&mut self) -> Result<usize, NeutronError>;
+
+    fn log_error(&mut self, msg: &str);
+    fn log_info(&mut self, msg: &str);
+    fn log_debug(&mut self, msg: &str);
 }
 
