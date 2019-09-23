@@ -1,0 +1,11 @@
+[package]
+name = "neutron-qx86-hypervisor"
+version = "0.1.0"
+authors = ["Jordan Earls <earlz@earlz.net>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+qx86 = { git = "https://github.com/qtumproject/qx86-rs"}
+
