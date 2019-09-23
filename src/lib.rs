@@ -4,11 +4,11 @@ pub struct NeutronAddress{
     pub data: Vec<u8>
 }
 pub struct NeutronVMResult{
-    pub gasUsed: u64,
-    pub shouldRevert: bool,
-    pub errorCode: u32,
-    pub errorLocation: u64,
-    pub extraData: u64
+    pub gas_used: u64,
+    pub should_revert: bool,
+    pub error_code: u32,
+    pub error_location: u64,
+    pub extra_data: u64
 }
 
 pub struct NeutronContext{
@@ -21,11 +21,11 @@ pub struct NeutronContext{
 pub struct ExecContext{
     pub flags: u64,
     pub sender: NeutronAddress,
-    pub gasLimit: u64,
-    pub valueSent: u64,
+    pub gas_limit: u64,
+    pub value_sent: u64,
     pub origin: NeutronAddress,
-    pub selfAddress: NeutronAddress,
-    pub nestLevel: u32
+    pub self_address: NeutronAddress,
+    pub nest_level: u32
 }
 pub struct TransactionContext{
     pub inputs: Vec<TxItem>,
@@ -38,11 +38,11 @@ pub struct TxItem{
 
 pub struct BlockContext{
     pub creator: NeutronAddress,
-    pub gasLimit: u64,
+    pub gas_limit: u64,
     pub difficulty: u64,
     pub height: u32,
-    pub previousTime: u64,
-    pub previousHashes: Vec<[u8; 32]>
+    pub previous_time: u64,
+    pub previous_hashes: Vec<[u8; 32]>
 }
 
 trait NeutronAPI{
