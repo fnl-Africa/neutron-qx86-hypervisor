@@ -1,11 +1,15 @@
 
-
+extern crate struct_deser;
+#[macro_use]
+extern crate struct_deser_derive;
 pub mod hypervisor;
+
 
 pub struct NeutronAddress{
     pub version: u32,
     pub data: Vec<u8>
 }
+
 pub struct NeutronVMResult{
     pub gas_used: u64,
     pub should_revert: bool,
@@ -54,10 +58,31 @@ pub enum NeutronError{
     UnrecoverableFailure
 }
 
+/*
+typedef struct{
+    uint8_t format;
+    uint8_t rootVM;
+    uint8_t vmVersion;
+    uint16_t flagOptions;
+    uint32_t qtumVersion;
+} NeutronVersion;
+*/
+#[derive(StructDeser, Debug, Eq, PartialEq, Default)]
+pub struct NeutronVersion{
+    pub format: u8,
+    pub root_vm: u8,
+    pub vm_version: u8,
+    #[le]
+    pub flags: u16,
+    #[le]
+    pub qtum_version: u32
+}
+
+
 
 /// This is the primary NeutronAPI interface. It is loosely based on the C Neutron API, but uses Rust paradigms and features
 /// This will require a heavier translation layer, but makes Rust usage significantly simpler
-trait NeutronAPI{
+pub trait NeutronAPI{
     fn get_context(&self) -> &NeutronContext;
     fn push_sccs(&mut self, data: &Vec<u8>) -> Result<(), NeutronError>;
     fn pop_sccs(&mut self, data: &mut Vec<u8>) -> Result<(), NeutronError>;
