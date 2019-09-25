@@ -3,7 +3,8 @@ use qx86::vm::*;
 use crate::*;
 use struct_deser::*;
 
-impl Hypervisor for dyn NeutronHypervisor{
+
+impl Hypervisor for NeutronHypervisor{
     fn interrupt(&mut self, vm: &mut VM, num: u8) -> Result<(), VMError>{
         let ctx = self.get_context();
         vm.set_reg32(Reg32::EAX, ctx.exec.nest_level);
@@ -11,8 +12,6 @@ impl Hypervisor for dyn NeutronHypervisor{
         Ok(())
     }
 }
-
-
 
 pub trait NeutronHypervisor : NeutronAPI{
     fn init_cpu(&mut self, vm: &mut VM) -> Result<(), VMError>{
