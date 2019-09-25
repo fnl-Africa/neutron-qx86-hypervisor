@@ -5,11 +5,13 @@ extern crate struct_deser_derive;
 pub mod hypervisor;
 
 
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct NeutronAddress{
     pub version: u32,
     pub data: Vec<u8>
 }
 
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct NeutronVMResult{
     pub gas_used: u64,
     pub should_revert: bool,
@@ -18,6 +20,7 @@ pub struct NeutronVMResult{
     pub extra_data: u64
 }
 
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct NeutronContext{
     pub exec: ExecContext,
     pub tx: TransactionContext,
@@ -25,6 +28,7 @@ pub struct NeutronContext{
     pub internal: usize
 }
 
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct ExecContext{
     pub flags: u64,
     pub sender: NeutronAddress,
@@ -34,15 +38,20 @@ pub struct ExecContext{
     pub self_address: NeutronAddress,
     pub nest_level: u32
 }
+
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct TransactionContext{
     pub inputs: Vec<TxItem>,
     pub outputs: Vec<TxItem>
 }
+
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct TxItem{
     pub sender: NeutronAddress,
     pub value: u64
 }
 
+#[derive(Clone, Debug, Eq, PartialEq, Default)]
 pub struct BlockContext{
     pub creator: NeutronAddress,
     pub gas_limit: u64,
@@ -52,6 +61,7 @@ pub struct BlockContext{
     pub previous_hashes: Vec<[u8; 32]>
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum NeutronError{
     Success,
     RecoverableFailure,
@@ -86,7 +96,7 @@ pub trait NeutronAPI{
     fn get_context(&self) -> &NeutronContext;
     fn push_sccs(&mut self, data: &Vec<u8>) -> Result<(), NeutronError>;
     fn pop_sccs(&mut self, data: &mut Vec<u8>) -> Result<(), NeutronError>;
-    fn pop_sccs_toss(&mut self) -> NeutronError; //returns no data, for throwing away the item
+    fn pop_sccs_toss(&mut self) -> Result<(), NeutronError>; //returns no data, for throwing away the item
     fn peek_sccs(&mut self, data: &mut Vec<u8>) -> Result<(), NeutronError>;
     fn peek_sccs_size(&mut self) -> Result<usize, NeutronError>;
 
