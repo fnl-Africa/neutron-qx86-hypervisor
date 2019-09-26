@@ -1,11 +1,21 @@
 extern crate qx86;
+extern crate neutronstar_constants;
 use qx86::vm::*;
 use crate::*;
 use struct_deser::*;
+use neutronstar_constants::*;
 
 
 impl Hypervisor for NeutronHypervisor{
     fn interrupt(&mut self, vm: &mut VM, num: u8) -> Result<(), VMError>{
+        if num == EXIT_INTERRUPT{
+            self.log_debug("Exit interrupt triggered");
+            return Err(VMError::InternalVMStop);
+        }
+        if num != NEUTRON_INTERRUPT{
+            self.log_error("Invalid interrupt triggered");
+            return Ok(());
+        }
         let ctx = self.get_context();
         vm.set_reg32(Reg32::EAX, ctx.exec.nest_level);
         println!("Interrupt occurred! {}", num);
