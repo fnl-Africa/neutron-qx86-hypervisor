@@ -10,4 +10,4 @@ edition = "2018"
 qx86 = { git = "https://github.com/qtumproject/qx86-rs", branch = "earlz/cc-pipeline"}
 struct_deser = "0.1.1"
 struct_deser-derive = "0.1.0"
-neutronstar-constants = { path = "../neutronstar-constants" }
+neutron-star-constants = { path = "../neutronstar-constants" }
