@@ -1,15 +1,16 @@
 extern crate qx86;
 extern crate neutron_star_constants;
+extern crate num;
 use qx86::vm::*;
-use crate::*;
-use struct_deser::*;
+use neutron_interface::*;
 use neutron_star_constants::*;
-
+use std::convert::TryFrom;
 
 impl Hypervisor for dyn NeutronHypervisor{
     fn interrupt(&mut self, vm: &mut VM, num: u8) -> Result<(), VMError>{
+        use NeutronSyscalls::*;
         if num == EXIT_INTERRUPT{
-            self.log_debug("Exit interrupt triggered");
+            self.log_debug("Exit interrupt triggered\n");
             return Err(VMError::InternalVMStop);
         }
         if num != NEUTRON_INTERRUPT{
@@ -17,8 +18,55 @@ impl Hypervisor for dyn NeutronHypervisor{
             return Ok(());
         }
         let ctx = self.get_context();
-        vm.set_reg32(Reg32::EAX, ctx.exec.nest_level);
-        println!("Interrupt occurred! {}", num);
+        let syscall = NeutronSyscalls::try_from(vm.reg32(Reg32::EAX)); // FromPrimitive::from_u32(vm.reg32(Reg32::EAX));
+        if syscall.is_err(){
+            self.log_error("Invalid syscall triggered");
+            return Ok(());
+        }
+        let syscall = syscall.unwrap();
+
+        let status = match syscall{
+            IsCreate => {
+                if ctx.exec.flags & 0x01 > 0{
+                    1
+                }else{
+                    0
+                }
+            },
+            PushSCCS => {
+                //data, length
+                let data = vm.copy_from_memory(vm.reg32(Reg32::EBX), vm.reg32(Reg32::ECX))?;
+                if self.push_sccs(&data).is_err(){
+                    return Err(VMError::NotYetImplemented)
+                }else{
+                    0
+                }
+            },
+            PopSCCS => {
+                //data, max_size, &actual_size
+                let mut data = vec![];
+                let res = self.pop_sccs(&mut data);
+                if res.is_err(){
+                    return Err(VMError::NotYetImplemented);
+                }
+                let len = std::cmp::min(vm.reg32(Reg32::ECX), data.len() as u32);
+                let s = &data[0..len as usize];
+                vm.copy_into_memory(vm.reg32(Reg32::EBX), s)?;
+                len
+            },
+            GasUsed => {
+                //&gas_used
+                let used = self.get_context().exec.gas_limit - vm.gas_remaining;
+                //todo: 64bit needed here? 
+                used as u32
+            }
+            _ => {
+                self.log_error("Unimplemented syscall!");
+                0
+            }
+        };
+        vm.set_reg32(Reg32::EAX, status);
+
         Ok(())
     }
 }
@@ -54,6 +102,8 @@ pub trait NeutronHypervisor : NeutronAPI{
         vm.memory.add_memory(0x80020000, 0xFFFF)?;
         //aux memory
         vm.memory.add_memory(0x80030000, 0xFFFF)?;
+        
+        //TODO: later add memory mapping of data areas.. This is currently.. non-trivial in pure Rust
         Ok(())
     }
 
@@ -84,7 +134,7 @@ pub trait NeutronHypervisor : NeutronAPI{
         
         Ok(())
     }
-    fn call_contract_from_sccs(&mut self, vm: &mut VM){
+    fn call_contract_from_sccs(&mut self, _vm: &mut VM){
 
     }
 }
